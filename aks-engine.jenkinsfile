@@ -21,24 +21,26 @@ node('slave') {
         az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET -t $AZURE_TENANT_ID
         az account set -s $AZURE_SUBSCRIPTION_ID
       '''
+     
+      withCredentials([azureServicePrincipal('Azure-AKS')]) {
+        // Create Resource Group
+        sh 'az group create --name $RESOURCE_GROUP --location $LOCATION'
+
+        sh '''
+            aks-engine deploy --subscription-id $AZURE_SUBSCRIPTION_ID \
+                --dns-prefix $RESOURCE_GROUP \
+                --resource-group $RESOURCE_GROUP \
+                --location $LOCATION \
+                --api-model ./kubernetes.json \
+                --client-id ${azureDeployClient} \
+                --client-secret ${azureDeploySecret} \
+                --set servicePrincipalProfile.clientId="$AZURE_CLIENT_ID" \
+                --set servicePrincipalProfile.secret="$AZURE_CLIENT_SECRET"
+            '''
+        }
     }
 
-    withCredentials([azureServicePrincipal('Azure-AKS')]) {
-      // Create Resource Group
-      sh 'az group create --name $RESOURCE_GROUP --location $LOCATION'
-
-      sh '''
-        aks-engine deploy --subscription-id $AZURE_SUBSCRIPTION_ID \
-            --dns-prefix $RESOURCE_GROUP \
-            --resource-group $RESOURCE_GROUP \
-            --location $LOCATION \
-            --api-model ./kubernetes.json \
-            --client-id ${azureDeployClient} \
-            --client-secret ${azureDeploySecret} \
-            --set servicePrincipalProfile.clientId="$AZURE_CLIENT_ID" \
-            --set servicePrincipalProfile.secret="$AZURE_CLIENT_SECRET"
-        '''
-    }
+    
     
     // log out
     sh 'az logout'
