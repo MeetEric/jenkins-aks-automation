@@ -20,7 +20,7 @@ node('slave') {
         az account set -s $AZURE_SUBSCRIPTION_ID
       '''
      
-      withCredentials([azureServicePrincipal('Azure-AKS', 'AKS_CLIENT', 'AKS_SECRET')]) {
+      withCredentials([azureServicePrincipal(credentialsId :'Azure-AKS', clientIdVariable : 'AKS_CLIENT', clientSecretVariable : 'AKS_SECRET')]) {
         // Create Resource Group
         sh 'az group create --name $RESOURCE_GROUP --location $LOCATION'
 
