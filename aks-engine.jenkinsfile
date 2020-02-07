@@ -14,15 +14,13 @@ node('slave') {
     echo "Running ${env.BUILD_ID} on node ${env.NODE_NAME}"
 
     withCredentials([azureServicePrincipal('Azure-Deploy')]) {
-      def azureDeployClient="$AZURE_CLIENT_ID"
-      def azureDeploySecret="$AZURE_CLIENT_SECRET"
       // login Azure
       sh '''
         az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET -t $AZURE_TENANT_ID
         az account set -s $AZURE_SUBSCRIPTION_ID
       '''
      
-      withCredentials([azureServicePrincipal('Azure-AKS')]) {
+      withCredentials([azureServicePrincipal('Azure-AKS', 'AKS_CLIENT', 'AKS_SECRET')]) {
         // Create Resource Group
         sh 'az group create --name $RESOURCE_GROUP --location $LOCATION'
 
@@ -32,10 +30,10 @@ node('slave') {
                 --resource-group $RESOURCE_GROUP \
                 --location $LOCATION \
                 --api-model ./kubernetes.json \
-                --client-id ${azureDeployClient} \
-                --client-secret ${azureDeploySecret} \
-                --set servicePrincipalProfile.clientId="$AZURE_CLIENT_ID" \
-                --set servicePrincipalProfile.secret="$AZURE_CLIENT_SECRET"
+                --client-id $AZURE_CLIENT_ID \
+                --client-secret $AZURE_CLIENT_SECRET \
+                --set servicePrincipalProfile.clientId="$AKS_CLIENT" \
+                --set servicePrincipalProfile.secret="$AKS_SECRET"
             '''
         }
     }
