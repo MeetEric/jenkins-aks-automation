@@ -14,6 +14,8 @@ node('slave') {
     echo "Running ${env.BUILD_ID} on node ${env.NODE_NAME}"
 
     withCredentials([azureServicePrincipal('Azure-Deploy')]) {
+      def azureDeployClient="$AZURE_CLIENT_ID"
+      def azureDeploySecret="$AZURE_CLIENT_SECRET"
       // login Azure
       sh '''
         az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET -t $AZURE_TENANT_ID
@@ -31,8 +33,8 @@ node('slave') {
             --resource-group $RESOURCE_GROUP \
             --location $LOCATION \
             --api-model ./kubernetes.json \
-            --client-id $AZURE_CLIENT_ID \
-            --client-secret $AZURE_CLIENT_SECRET \
+            --client-id ${azureDeployClient} \
+            --client-secret ${azureDeploySecret} \
             --set servicePrincipalProfile.clientId="$AZURE_CLIENT_ID" \
             --set servicePrincipalProfile.secret="$AZURE_CLIENT_SECRET"
         '''
