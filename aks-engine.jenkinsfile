@@ -39,7 +39,7 @@ node('slave') {
                 --set servicePrincipalProfile.secret="$AKS_SECRET" \
                 --set masterProfile.vnetSubnetId="$MASTER_VNET_ID" \
                 --set masterProfile.firstConsecutiveStaticIP="$MASTER_INITIAL_IP" \
-                --set agentPoolProfiles.vnetSubnetId="$AGENT_VNET_ID" \
+                --set agentPoolProfiles[0].vnetSubnetId="$AGENT_VNET_ID" \
                 --set linuxProfile.ssh.publicKeys[0].keyData="$SSH_PUBLIC_KEY" 
             '''
         }
