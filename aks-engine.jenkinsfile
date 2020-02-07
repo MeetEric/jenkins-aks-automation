@@ -25,6 +25,9 @@ node('slave') {
         sh 'az group create --name $RESOURCE_GROUP --location $LOCATION'
 
         sh '''
+            export VNET_ID="/subscriptions/$AZURE_SUBSCRIPTION_ID/resourceGroups/$VNET_RESOURCE_GROUP/providers/Microsoft.Network/virtualNetworks/$VNET_NAME"
+            export MASTER_VNET_ID="${VNET_ID}/subnets/$MASTER_SUBNET_NAME"
+            export AGENT_VNET_ID="${VNET_ID}/subnets/$AGENT_SUBNET_NAME"
             aks-engine deploy -f --subscription-id $AZURE_SUBSCRIPTION_ID \
                 --dns-prefix $RESOURCE_GROUP \
                 --resource-group $RESOURCE_GROUP \
@@ -33,7 +36,11 @@ node('slave') {
                 --client-id $AZURE_CLIENT_ID \
                 --client-secret $AZURE_CLIENT_SECRET \
                 --set servicePrincipalProfile.clientId="$AKS_CLIENT" \
-                --set servicePrincipalProfile.secret="$AKS_SECRET"
+                --set servicePrincipalProfile.secret="$AKS_SECRET" \
+                --set masterProfile.vnetSubnetId="$MASTER_VNET_ID" \
+                --set masterProfile.firstConsecutiveStaticIP="$MASTER_INITIAL_IP" \
+                --set agentPoolProfiles.vnetSubnetId="$AGENT_VNET_ID" \
+                --set linuxProfile.ssh.publicKeys[0].keyData="$SSH_PUBLIC_KEY" 
             '''
         }
     }
