@@ -41,6 +41,9 @@ node('slave') {
                 --set masterProfile.firstConsecutiveStaticIP="$MASTER_INITIAL_IP" \
                 --set agentPoolProfiles[0].vnetSubnetId="$AGENT_VNET_ID" \
                 --set linuxProfile.ssh.publicKeys[0].keyData="$SSH_PUBLIC_KEY" 
+            
+            export KUBECONFIG=_output/$RESOURCE_GROUP/kubeconfig/kubeconfig.$LOCATION.json
+            kubectl cluster-info
             '''
         }
     }
