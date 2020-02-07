@@ -1,0 +1,46 @@
+import groovy.json.JsonSlurper
+
+def getAcrLoginServer(def acrSettingsJson) {
+  def acrSettings = new JsonSlurper().parseText(acrSettingsJson)
+  return acrSettings.loginServer
+}
+
+node('slave') {
+  stage('init') {
+    checkout scm
+  }
+  
+  stage('deploy') {
+    echo "Running ${env.BUILD_ID} on node ${env.NODE_NAME}"
+
+    withCredentials([azureServicePrincipal('Azure-Deploy')]) {
+      // login Azure
+      sh '''
+        az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET -t $AZURE_TENANT_ID
+        az account set -s $AZURE_SUBSCRIPTION_ID
+      '''
+     
+      withCredentials([azureServicePrincipal(credentialsId :'Azure-AKS', clientIdVariable : 'AKS_CLIENT', clientSecretVariable : 'AKS_SECRET')]) {
+        // Create Resource Group
+        sh 'az group create --name $RESOURCE_GROUP --location $LOCATION'
+
+        sh '''
+            export ARM_SUBSCRIPTION_ID=$AZURE_SUBSCRIPTION_ID
+            export ARM_CLIENT_ID=$AZURE_CLIENT_ID
+            export ARM_CLIENT_SECRET=$AZURE_CLIENT_SECRET
+            export ARM_TENANT_ID=$AZURE_TENANT_ID
+            export ARM_ENVIRONMENT=public
+
+            cd aks-terraform/tf
+            terraform init
+            terraform apply
+            '''
+        }
+    }
+
+    
+    
+    // log out
+    sh 'az logout'
+  }
+}
