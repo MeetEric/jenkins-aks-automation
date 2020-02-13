@@ -8,11 +8,6 @@ variable "name" {
 
 variable "prefix" {
     type = string
-
-    validation {
-        condition = length(var.prefix) > 3 && length(var.prefix) <= 8
-        error_message = "A prefix must be provided and between 3 and 8 characters"
-    }
 }
 
 output "location" {
