@@ -1,7 +1,10 @@
-provider "azurerm" {
+module "config" {
+    source = "./modules/configuration"
+    name = "ericmai-tf-test2"
+    location = "westus"
+    prefix = "emtf"
 }
 
-resource "azurerm_resource_group" "rg" {
-        name = "ericmai-tf-test"
-        location = "westus"
+module "init" {
+    source = "./modules/azure"
 }
