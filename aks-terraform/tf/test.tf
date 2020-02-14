@@ -7,5 +7,5 @@ module "config" {
 
 module "init" {
     source = "./modules/azure"
-    config = modules.config
+    config = module.config
 }
