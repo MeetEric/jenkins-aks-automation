@@ -1,7 +1,14 @@
+input "config" {
+    type = object({
+        name = string
+        location = string
+    })
+}
+
 provider "azurerm" {
 }
 
 resource "azurerm_resource_group" "rg" {
-    name = modules.config.name
-    location = modules.config.location
+    name = var.config.name
+    location = var.config.location
 }
