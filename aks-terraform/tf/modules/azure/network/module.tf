@@ -9,7 +9,7 @@ variable "name" {
     type = string
 }
 
-resource "azurerm_virtual_network" "$(var.name)" {
+resource "azurerm_virtual_network" "current" {
   name                = "$(var.name)"
   location            = var.config.location
   resource_group_name = var.config.name
